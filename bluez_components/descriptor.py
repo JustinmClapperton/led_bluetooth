@@ -12,7 +12,8 @@ import sys
 
 from random import randint
 
-from constants import *
+from bluez_components.constants import *
+from bluez_components.exceptions import *
 
 
 class Descriptor(dbus.service.Object):

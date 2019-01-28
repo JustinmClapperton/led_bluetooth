@@ -14,8 +14,8 @@ import sys
 
 from random import randint
 
-from constants import *
-from exceptions import *
+from bluez_components.constants import *
+from bluez_components.exceptions import *
 
 
 class Application(dbus.service.Object):
