@@ -17,8 +17,17 @@ from led_advertisement import LedAdvertisement
 from led_application import LedApplication
 from led_service import LedService
 from led_characteristic import LedCharacteristic
+from iphone_led_characteristic import IphoneLedCharacteristic
 
 from bluez_components.constants import *
+
+RED_LED_PIN = 0
+YELLOW_LED_PIN = 0
+GREEN_LED_PIN = 0
+
+RED_BUTTON_PIN = 0
+YELLOW_BUTTON_PIN = 0
+GREEN_BUTTON_PIN = 0
 
 
 def register_ad_cb():
@@ -103,6 +112,46 @@ def get_ad_manager(bus):
 
     return ad_manager
 
+color_pins = {
+    12: "red",
+    26: "yellow",
+    13: "green"
+}
+
+color_ints = {
+    "red": 0,
+    "yellow": 1,
+    "green": 2
+}
+
+iPhoneCharacteristic = None
+
+def gpio_callback(gpio_id):
+
+    if gpio_id not in color_pins:
+        return
+
+    color = color_pins[gpio_id]
+    pin_value = GPIO.input(gpio_id)
+    
+    if button_states[color] and not pin_value:
+        iPhoneCharacteristic.notify_led_changed(color_ints[color], pin_value)
+        print("{color} off".format(color=color))
+        button_states[color] = False
+        pass
+    elif not button_states[color] and pin_value:
+        iPhoneCharacteristic.notify_led_changed(color_ints[color], pin_value)
+        print("{color} on".format(color=color))
+        button_states[color] = True
+
+button_states = {
+    "red": False,
+    "yellow": False,
+    "green": False
+}
+
+
+
 def setup():
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(21, GPIO.OUT)
@@ -111,6 +160,9 @@ def setup():
     GPIO.setup(12, GPIO.IN)
     GPIO.setup(13, GPIO.IN)
     GPIO.setup(26, GPIO.IN)
+    GPIO.add_event_detect(12, GPIO.BOTH, callback=gpio_callback)
+    GPIO.add_event_detect(26, GPIO.BOTH, callback=gpio_callback)
+    GPIO.add_event_detect(13, GPIO.BOTH, callback=gpio_callback)
 
 def setup_application(bus):
 
@@ -120,10 +172,13 @@ def setup_application(bus):
 
 
 def setup_service(bus):
+    global iPhoneCharacteristic
 
     service = LedService(bus, 0)
     characteristic = LedCharacteristic(bus, 0, service)
+    iPhoneCharacteristic = IphoneLedCharacteristic(bus, 1, service)
     service.add_characteristic(characteristic)
+    service.add_characteristic(iPhoneCharacteristic)
     return service
 
 def setup_characteristic(bus):
@@ -168,6 +223,7 @@ def main():
 
     try:
         mainloop.run()
+        # GPIO.wait_for_interrupts(threaded=True)
         print('started input')
     except KeyboardInterrupt:
         print("interupt")
