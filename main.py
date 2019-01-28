@@ -115,14 +115,15 @@ def setup():
 def setup_application(bus):
 
     # Create gatt services
-    application = LedApplication(bus)
+    return LedApplication(bus)
+
 
 
 def setup_service(bus):
 
     service = LedService(bus, 0)
     characteristic = LedCharacteristic(bus, 0, service)
-    service.add_characteristic(service)
+    service.add_characteristic(characteristic)
     return service
 
 def setup_characteristic(bus):
@@ -137,7 +138,7 @@ mainloop = None
 
 def main():
     global mainloop
-
+    setup()
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
     bus = dbus.SystemBus() 
@@ -146,12 +147,12 @@ def main():
     service_manager = get_service_manager(bus)
     ad_manager = get_ad_manager(bus)
 
-    # GObject.threads_init()
-    mainloop = GObject.MainLoop()
-
     application = setup_application(bus)
     service = setup_service(bus)
     application.add_service(service)
+
+    # GObject.threads_init()
+    mainloop = GObject.MainLoop()
 
     # Register gatt services
     service_manager.RegisterApplication(application.get_path(), {},
@@ -164,23 +165,17 @@ def main():
     ad_manager.RegisterAdvertisement(test_advertisement.get_path(), {},
                                      reply_handler=register_ad_cb,
                                      error_handler=register_ad_error_cb)
-    print(application)
 
-
-    GObject.timeout_add(1000, readInput)
-
-    print('running mainloop\n')
-
-    inputThread = threading.Thread(name='input', target=readInput)
     try:
         mainloop.run()
-        inputThread.start()
         print('started input')
     except KeyboardInterrupt:
         print("interupt")
         GPIO.cleanup()
-        application_killed = True
-        inputThread.stop()
+        mainloop.quit()
+    finally:
+        GPIO.cleanup()
+
         mainloop.quit()
 
 if __name__ == '__main__':
