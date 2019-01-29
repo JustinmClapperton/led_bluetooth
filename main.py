@@ -21,13 +21,7 @@ from iphone_led_characteristic import IphoneLedCharacteristic
 
 from bluez_components.constants import *
 
-RED_LED_PIN = 0
-YELLOW_LED_PIN = 0
-GREEN_LED_PIN = 0
-
-RED_BUTTON_PIN = 0
-YELLOW_BUTTON_PIN = 0
-GREEN_BUTTON_PIN = 0
+from pins import *
 
 
 def register_ad_cb():
@@ -113,9 +107,9 @@ def get_ad_manager(bus):
     return ad_manager
 
 color_pins = {
-    12: "red",
-    26: "yellow",
-    13: "green"
+    RED_BUTTON_PIN: "red",
+    YELLOW_BUTTON_PIN: "yellow",
+    GREEN_BUTTON_PIN: "green"
 }
 
 color_ints = {
@@ -154,15 +148,15 @@ button_states = {
 
 def setup():
     GPIO.setmode(GPIO.BCM)
-    GPIO.setup(21, GPIO.OUT)
-    GPIO.setup(20, GPIO.OUT)
-    GPIO.setup(16, GPIO.OUT)
-    GPIO.setup(12, GPIO.IN)
-    GPIO.setup(13, GPIO.IN)
-    GPIO.setup(26, GPIO.IN)
-    GPIO.add_event_detect(12, GPIO.BOTH, callback=gpio_callback)
-    GPIO.add_event_detect(26, GPIO.BOTH, callback=gpio_callback)
-    GPIO.add_event_detect(13, GPIO.BOTH, callback=gpio_callback)
+    GPIO.setup(RED_LED_PIN, GPIO.OUT)
+    GPIO.setup(YELLOW_LED_PIN, GPIO.OUT)
+    GPIO.setup(GREEN_LED_PIN, GPIO.OUT)
+    GPIO.setup(RED_BUTTON_PIN, GPIO.IN)
+    GPIO.setup(YELLOW_BUTTON_PIN, GPIO.IN)
+    GPIO.setup(GREEN_BUTTON_PIN, GPIO.IN)
+    GPIO.add_event_detect(RED_BUTTON_PIN, GPIO.BOTH, callback=gpio_callback)
+    GPIO.add_event_detect(YELLOW_BUTTON_PIN, GPIO.BOTH, callback=gpio_callback)
+    GPIO.add_event_detect(GREEN_BUTTON_PIN, GPIO.BOTH, callback=gpio_callback)
 
 def setup_application(bus):
 

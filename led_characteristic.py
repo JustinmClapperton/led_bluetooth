@@ -1,6 +1,7 @@
 from bluez_components.characteristic import Characteristic
 import RPi.GPIO as GPIO
 import pdb
+from pins import *
 
 class LedCharacteristic(Characteristic):
     BASE_LED_UUID = '12345678-1234-5678-1234-56789abcff67'
@@ -14,9 +15,9 @@ class LedCharacteristic(Characteristic):
     
     def pin_from_color(color):
         return {
-        "red": 16,
-        "yellow": 20,
-        "green": 21
+        "red": RED_LED_PIN,
+        "yellow": YELLOW_LED_PIN,
+        "green": GREEN_LED_PIN
     }.get(color, '0')
 
     def __init__(self, bus, index, service):
